@@ -48,5 +48,12 @@
             var product = _productList.First(x => x.Id == id);
             return await Task.FromResult(product);
         }
+
+        public async Task EventOccured(Product product, string evt)
+        {
+            _productList.Single(x => x.Id == product.Id)
+                    .Name = $"{product.Name} evt: {evt}";
+            await Task.CompletedTask;
+        }
     }
 }

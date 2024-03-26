@@ -1,5 +1,6 @@
 ﻿using Cqrs.MediatR.Example.Commands.Products;
 using Cqrs.MediatR.Example.Data;
+using Cqrs.MediatR.Example.Notifications;
 using Cqrs.MediatR.Example.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -11,14 +12,19 @@ namespace Cqrs.MediatR.Example.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ISender _sender;
+        private readonly IPublisher _publisher;
 
-        public ProductController(ISender sender) => _sender = sender;
+        public ProductController(ISender sender, IPublisher publisher)
+        {
+            _sender = sender;
+            _publisher = publisher;
+        } 
 
         [HttpPost]
         public async Task<IActionResult> AddProduct([FromBody] Product product)
         {
             var productToReturn = await _sender.Send(new AddProductCommand(product));
-
+            await _publisher.Publish(new ProductAddedNotification(productToReturn));
             return CreatedAtRoute("GetProductById", new { id = productToReturn.Id }, productToReturn);
         }
 
